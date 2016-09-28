@@ -16,7 +16,6 @@ namespace Assignment1_NimGame.Models
             return choice;
         }
 
-        
 
     }
 }
