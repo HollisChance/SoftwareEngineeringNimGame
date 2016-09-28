@@ -14,6 +14,7 @@ namespace Assignment1_NimGame.Models
         const int row2Size = 5;
         const int row3Size = 7;
         private Row[] _rows;
+        private List<BoardState> boardStates = new List<BoardState>(); // maybe this shouldn't be global? just stored on a per game basis(ie in PlayGame)
         Player turn;
         
         public void PlayGame()
@@ -27,25 +28,34 @@ namespace Assignment1_NimGame.Models
                 while (!isGameOver)
                 {
                     printBoard();
-                    TakeTurn();
+                    isGameOver = TakeTurn();
+                }
+                Console.WriteLine("enter 0 to Quit, or anything else to play again");
+                string input = Console.ReadLine();
+                if (input.Equals("0"))
+                {
+                    keepPlaying = false; // exits game
                 }
             }
         }
 
-        public void TakeTurn()
+        public bool TakeTurn()
         {
+            bool isGameOver = false;
             int row = PromptForRow(turn + " enter the row you wish to take piece/pieces from");
             int numToRemove = PromptForInt("Enter the number of pieces you wish to remove from row " + row, 1, _rows[row - 1].RowSize);
             
             if (_rows[row - 1].RemovePieces(numToRemove))
             {
                 ChangeTurn();
-
+                // store board state here???
                 if (CheckForGameOver())
                 {
                     Console.WriteLine("Player " + turn + " wins");
+                    isGameOver = true;
                 }
             }
+            return isGameOver;
         }
 
         public bool CheckForGameOver()

@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="enums\Player.cs" />
+    <Compile Include="Models\BoardState.cs" />
     <Compile Include="Models\ComputerPlayer.cs" />
     <Compile Include="Models\Game.cs" />
     <Compile Include="Models\Piece.cs" />
