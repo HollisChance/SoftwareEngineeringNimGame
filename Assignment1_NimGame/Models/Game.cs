@@ -16,11 +16,19 @@ namespace Assignment1_NimGame.Models
         private Row[] _rows;
         private List<BoardState> boardStates = new List<BoardState>(); // maybe this shouldn't be global? just stored on a per game basis(ie in PlayGame)
         Player turn;
+        ComputerPlayer compPlayer1;
+        ComputerPlayer compPlayer2;
+        int player1Wins = 0;
+        int player2Wins = 0;
+        int numComputerPlayers;
         
         public void PlayGame()
         {
             turn = Player.Player1;
             bool keepPlaying = true;
+            compPlayer1 = new ComputerPlayer();
+            compPlayer2 = new ComputerPlayer();
+            numComputerPlayers = ChooseGameMode();
             while(keepPlaying)
             {
                 _rows = new Row[] { new Row(row1Size), new Row(row2Size), new Row(row3Size) };
@@ -28,36 +36,181 @@ namespace Assignment1_NimGame.Models
                 while (!isGameOver)
                 {
                     printBoard();
-                    isGameOver = TakeTurn();
+                    isGameOver = TakeTurn(numComputerPlayers); // set to one human vs comp
                 }
+                Console.WriteLine("Player1 wins: " + player1Wins + " Player2 wins: " + player2Wins);
                 Console.WriteLine("enter 0 to Quit, or anything else to play again");
                 string input = Console.ReadLine();
                 if (input.Equals("0"))
                 {
                     keepPlaying = false; // exits game
+                    Console.WriteLine("Comp1 bad states");
+                    compPlayer1.PrintBadStates();
+                    Console.WriteLine();
+                    Console.WriteLine();
+                    Console.WriteLine("Comp2 bad states");
+                    compPlayer2.PrintBadStates();
+
+                    Console.WriteLine("Player1 wins: " + player1Wins + " Player2 wins: " + player2Wins);
                 }
             }
         }
 
-        public bool TakeTurn()
+        public void RandomVsLearningAI(int playTimes)
+        {
+            turn = Player.Player1;
+            bool keepPlaying = true;
+            compPlayer1 = new ComputerPlayer();
+            compPlayer2 = new ComputerPlayer();
+            numComputerPlayers = 2;
+            for (int j = 0; j < playTimes; ++j)
+            {
+                _rows = new Row[] { new Row(row1Size), new Row(row2Size), new Row(row3Size) };
+                bool isGameOver = false;
+                while (!isGameOver)
+                {
+                    printBoard();
+                    isGameOver = TakeTurn(numComputerPlayers); // set to one human vs comp
+                }
+
+            }
+            Console.WriteLine("Comp1 bad states");
+            compPlayer1.PrintBadStates();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine("Comp2 bad states");
+            compPlayer2.PrintBadStates();
+
+            Console.WriteLine("Player1 wins: " + player1Wins + " Player2 wins: " + player2Wins);
+        }
+        
+        public int ChooseGameMode()
+        {
+            int numComputerPlayers = PromptForInt("Enter 0 for player vs player, 1 for player vs cpu, or 2 for cpu vs cpu", 0, 2);
+            return numComputerPlayers;
+        }
+
+        public bool TakeTurn(int compPlayers)
         {
             bool isGameOver = false;
+            if (compPlayers == 1)
+            {
+                if (turn == Player.Player2)
+                {
+                    isGameOver = TakeComputerTurn(compPlayer2);
+                }
+                else
+                {
+                    isGameOver = TakePlayerTurn();
+                }
+            }
+            else if (compPlayers == 2)
+            {
+                if (turn == Player.Player1)
+                {
+                    isGameOver = TakeComputerTurn(compPlayer1);                        
+                }
+                else
+                {
+                    isGameOver = TakeComputerTurn(compPlayer2);
+                }
+            }
+            else
+            {
+                isGameOver = TakePlayerTurn();
+            }
+            return isGameOver;
+        }
+
+        public bool TakePlayerTurn()
+        {
+            bool isGameOver = false;
+
             int row = PromptForRow(turn + " enter the row you wish to take piece/pieces from");
             int numToRemove = PromptForInt("Enter the number of pieces you wish to remove from row " + row, 1, _rows[row - 1].RowSize);
-            
+
+            isGameOver = MakeMove(row, numToRemove);
+
+            return isGameOver;
+        }
+
+        public bool TakeComputerTurn(ComputerPlayer comp)
+        {
+            int row = 0;
+            int numToRemove = 0;
+            if (turn == Player.Player2) // computer 2 uses the learning system
+            {
+                Move move = comp.MakeLearnedMove(_rows);
+                row = move.Row;
+                numToRemove = move.NumToRemove;
+            }
+            else  // computer 1 doesn't use the learning ai
+            {
+                row = comp.MakeRowChoice(_rows.Count(), _rows);
+                numToRemove = comp.MakeRandomChoice(_rows[row - 1].RowSize);
+            }
+            Console.WriteLine("Computer " + turn + " takes " + numToRemove + " from row " + row);
+            bool isGameOver = MakeMove(row, numToRemove);
+            return isGameOver;
+        }
+
+        public bool MakeMove(int row, int numToRemove)
+        {
+            bool isGameOver = false;
             if (_rows[row - 1].RemovePieces(numToRemove))
             {
                 ChangeTurn();
-                // store board state here???
+
+                BoardState state = new BoardState(_rows[0].RowSize, _rows[1].RowSize, _rows[2].RowSize);
+                boardStates.Add(state); // boardstate is stored here!
+
                 if (CheckForGameOver())
                 {
                     Console.WriteLine("Player " + turn + " wins");
+                    IncrementWins();
+                    StoreComputerLosingMove();
                     isGameOver = true;
                 }
             }
             return isGameOver;
         }
 
+        public void StoreComputerLosingMove()
+        {
+            if (numComputerPlayers == 1)
+            {
+                if (turn == Player.Player1)
+                {
+                    BoardState losingState = boardStates[(boardStates.Count - 3)];
+                    compPlayer2.addLosingMove(losingState);
+                }
+            }
+            else if (numComputerPlayers == 2)
+            {
+                if (turn == Player.Player1) // if winner is p1, comp2 stores losing move
+                {
+                    BoardState losingState = boardStates[(boardStates.Count - 3)];
+                    compPlayer2.addLosingMove(losingState);
+                }
+                else if (turn == Player.Player2) // if the winner is player 2, comp 1 stores the losing move
+                {
+                    BoardState losingState = boardStates[(boardStates.Count - 3)];
+                    compPlayer1.addLosingMove(losingState);
+                }
+            }
+        }
+
+        public void IncrementWins()
+        {
+            if (turn == Player.Player1)
+            {
+                ++player1Wins;
+            }
+            else
+            {
+                ++player2Wins;
+            }
+        }
         public bool CheckForGameOver()
         {
             bool isGameOver = true;
@@ -129,6 +282,5 @@ namespace Assignment1_NimGame.Models
             }
             return result;
         }
-        
     }
 }

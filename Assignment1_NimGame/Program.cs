@@ -12,7 +12,9 @@ namespace Assignment1_NimGame
         public static void Main(string[] args)
         {
             Game game = new Game();
+            Game aiTest = new Game();
             game.PlayGame();
+            aiTest.RandomVsLearningAI(10000);
         }
     }
 }
