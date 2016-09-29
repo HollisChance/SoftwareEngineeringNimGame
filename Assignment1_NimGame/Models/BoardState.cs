@@ -12,6 +12,8 @@ namespace Assignment1_NimGame.Models
         private int middleRow;
         private int bottomRow;
 
+        public int MoveValue { get; set; } // added post-deadline
+
         //public  bool isBadState { get; set; }  // ??? better to be a numerical value?
 
         public BoardState(int top, int mid, int bottom)
