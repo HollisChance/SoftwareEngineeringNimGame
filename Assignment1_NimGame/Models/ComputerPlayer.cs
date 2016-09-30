@@ -9,8 +9,11 @@ namespace Assignment1_NimGame.Models
     public class ComputerPlayer
     {
         Random rnd = new Random();
+        private double goodMoveThreshhold = 0;
+        private const int maxThreshold = 100;
+        private const double threshholdIncrement = .2;
 
-        private List<BoardState> badStates = new List<BoardState>();
+        private List<BoardState> MoveStates = new List<BoardState>();
 
         public int MakeRowChoice(int max, Row[] rows)
         {
@@ -34,7 +37,7 @@ namespace Assignment1_NimGame.Models
                 Row[] testRows = new Row[] { new Row(rows[0].RowSize), new Row(rows[1].RowSize), new Row(rows[2].RowSize) };
 
                 row = MakeRowChoice(rows.Count(), rows);
-                Console.WriteLine("Row sizes: " + rows[0].RowSize + " " + rows[1].RowSize + " " + rows[2].RowSize + " ");
+                //Console.WriteLine("Row sizes: " + rows[0].RowSize + " " + rows[1].RowSize + " " + rows[2].RowSize + " ");
                 numToRem = MakeRandomChoice(rows[row - 1].RowSize);
 
                 testRows[row - 1].RowSize -= numToRem;
@@ -42,6 +45,8 @@ namespace Assignment1_NimGame.Models
                 BoardState projectedState = new BoardState(testRows[0].RowSize, testRows[1].RowSize, testRows[2].RowSize);
 
                 isGoodMove = TestMove(projectedState);
+
+                moveAttempts++;
             }
             move = new Move { Row = row, NumToRemove = numToRem };
 
@@ -51,12 +56,24 @@ namespace Assignment1_NimGame.Models
         public bool TestMove(BoardState projectedState)
         {
             bool isGood = true;
-            foreach(BoardState badState in badStates)
+            foreach(BoardState state in MoveStates)
             {
-                if (projectedState == badState)
+                if (projectedState.Equals(state))
                 {
-                    isGood = false;
-                    break;
+                    if (projectedState.MoveValue > goodMoveThreshhold)
+                    {
+                        if (goodMoveThreshhold < maxThreshold)
+                        {
+                            goodMoveThreshhold += threshholdIncrement;
+                        }
+                        isGood = true;
+                        break;
+                    }
+                    else
+                    {
+                        isGood = false;
+                        break;
+                    }
                 }
             }
             return isGood;
@@ -68,15 +85,32 @@ namespace Assignment1_NimGame.Models
             return choice;
         }
 
-        public void addLosingMove(BoardState losingState)
+        public void AddCriticalMove(BoardState criticalState)
         {
-            badStates.Add(losingState);
-            Console.WriteLine(badStates.Last());
+            if (!CheckIfMoveIsKnown(criticalState))
+            {
+                MoveStates.Add(criticalState);
+            }
+            //Console.WriteLine(MoveStates.Last());
+        }
+
+        public bool CheckIfMoveIsKnown(BoardState newState)
+        {
+            bool isDuplicate = false;
+            foreach (BoardState state in MoveStates)
+            {
+                if (newState.Equals(state))
+                {
+                    isDuplicate = true;
+                    state.MoveValue += newState.MoveValue;
+                }
+            }
+            return isDuplicate;
         }
 
         public void PrintBadStates()
         {
-            foreach (BoardState state in badStates)
+            foreach (BoardState state in MoveStates)
             {
                 Console.WriteLine(state);
             }

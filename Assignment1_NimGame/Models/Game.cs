@@ -38,7 +38,6 @@ namespace Assignment1_NimGame.Models
                     printBoard();
                     isGameOver = TakeTurn(numComputerPlayers); // set to one human vs comp
                 }
-                Console.WriteLine("Player1 wins: " + player1Wins + " Player2 wins: " + player2Wins);
                 Console.WriteLine("enter 0 to Quit, or anything else to play again");
                 string input = Console.ReadLine();
                 if (input.Equals("0"))
@@ -51,7 +50,6 @@ namespace Assignment1_NimGame.Models
                     Console.WriteLine("Comp2 bad states");
                     compPlayer2.PrintBadStates();
 
-                    Console.WriteLine("Player1 wins: " + player1Wins + " Player2 wins: " + player2Wins);
                 }
             }
         }
@@ -59,7 +57,6 @@ namespace Assignment1_NimGame.Models
         public void RandomVsLearningAI(int playTimes)
         {
             turn = Player.Player1;
-            bool keepPlaying = true;
             compPlayer1 = new ComputerPlayer();
             compPlayer2 = new ComputerPlayer();
             numComputerPlayers = 2;
@@ -70,9 +67,8 @@ namespace Assignment1_NimGame.Models
                 while (!isGameOver)
                 {
                     printBoard();
-                    isGameOver = TakeTurn(numComputerPlayers); // set to one human vs comp
+                    isGameOver = TakeTurn(numComputerPlayers); 
                 }
-
             }
             Console.WriteLine("Comp1 bad states");
             compPlayer1.PrintBadStates();
@@ -80,10 +76,10 @@ namespace Assignment1_NimGame.Models
             Console.WriteLine();
             Console.WriteLine("Comp2 bad states");
             compPlayer2.PrintBadStates();
-
             Console.WriteLine("Player1 wins: " + player1Wins + " Player2 wins: " + player2Wins);
+
         }
-        
+
         public int ChooseGameMode()
         {
             int numComputerPlayers = PromptForInt("Enter 0 for player vs player, 1 for player vs cpu, or 2 for cpu vs cpu", 0, 2);
@@ -167,35 +163,47 @@ namespace Assignment1_NimGame.Models
                 if (CheckForGameOver())
                 {
                     Console.WriteLine("Player " + turn + " wins");
+                    Console.WriteLine("Player1 wins: " + player1Wins + " Player2 wins: " + player2Wins);
+
                     IncrementWins();
-                    StoreComputerLosingMove();
+                    StoreCriticalMoves();
                     isGameOver = true;
+                    boardStates.Clear();
                 }
             }
             return isGameOver;
         }
 
-        public void StoreComputerLosingMove()
+        public void StoreCriticalMoves()
         {
             if (numComputerPlayers == 1)
             {
                 if (turn == Player.Player1)
                 {
-                    BoardState losingState = boardStates[(boardStates.Count - 3)];
-                    compPlayer2.addLosingMove(losingState);
+                    BoardState losingState = boardStates[(boardStates.Count - 3)]; // third from last move, the move that led to the win/loss
+                    losingState.MoveValue += -1;
+                    compPlayer2.AddCriticalMove(losingState);
+                }
+                else if(turn == Player.Player2)
+                {
+                    BoardState losingState = boardStates[(boardStates.Count - 3)]; // third from last move, the move that led to the win/loss
+                    losingState.MoveValue += 1; 
+                    compPlayer2.AddCriticalMove(losingState);
                 }
             }
             else if (numComputerPlayers == 2)
             {
-                if (turn == Player.Player1) // if winner is p1, comp2 stores losing move
+                if (turn == Player.Player1) // Comp stores last critical move
                 {
                     BoardState losingState = boardStates[(boardStates.Count - 3)];
-                    compPlayer2.addLosingMove(losingState);
+                    losingState.MoveValue += -1;
+                    compPlayer2.AddCriticalMove(losingState);
                 }
                 else if (turn == Player.Player2) // if the winner is player 2, comp 1 stores the losing move
                 {
                     BoardState losingState = boardStates[(boardStates.Count - 3)];
-                    compPlayer1.addLosingMove(losingState);
+                    losingState.MoveValue += 1;
+                    compPlayer2.AddCriticalMove(losingState);
                 }
             }
         }
@@ -211,6 +219,7 @@ namespace Assignment1_NimGame.Models
                 ++player2Wins;
             }
         }
+
         public bool CheckForGameOver()
         {
             bool isGameOver = true;
@@ -251,8 +260,8 @@ namespace Assignment1_NimGame.Models
             int row = 1;
             while (!isValid)
             {
-                row = PromptForInt(turn + " enter the row you wish to take piece/pieces from", 0, _rows.Count());
-                if (_rows[row - 1].RowSize > 0)
+                row = PromptForInt(turn + " enter the row you wish to take piece/pieces from", 1, _rows.Count());
+                if (_rows[row - 1].RowSize >= 1)
                 {
                     isValid = true;
                 }
