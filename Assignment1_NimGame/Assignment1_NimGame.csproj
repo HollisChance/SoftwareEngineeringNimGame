@@ -49,7 +49,10 @@
     <Compile Include="Models\Game.cs" />
     <Compile Include="Models\Move.cs" />
     <Compile Include="Models\Piece.cs" />
+    <Compile Include="Models\Player.cs" />
+    <Compile Include="Models\RandomAI.cs" />
     <Compile Include="Models\Row.cs" />
+    <Compile Include="Models\SmartAI.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
