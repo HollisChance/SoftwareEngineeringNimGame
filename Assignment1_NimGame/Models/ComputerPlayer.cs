@@ -25,6 +25,14 @@ namespace Assignment1_NimGame.Models
             return choice;
         }
 
+        public Move MakeRandomMove(Row[] rows)
+        {
+            int row = MakeRowChoice(rows.Count(), rows);
+            int numToRemove = MakeRandomChoice(rows[row].RowSize);
+            Move move = new Move { Row = row, NumToRemove = numToRemove };
+            return move;
+        }
+
         public Move MakeLearnedMove(Row[] rows)
         {
             int row = 1;
