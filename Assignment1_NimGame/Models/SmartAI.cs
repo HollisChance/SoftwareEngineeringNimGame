@@ -8,8 +8,7 @@ namespace Assignment1_NimGame.Models
 {
     public class SmartAI : NimPlayer
     {
-
-        Random rnd = new Random();
+        private Random rnd = new Random();
         private double goodMoveThreshhold = 0;
         private const int maxThreshold = 100;
         private const double threshholdIncrement = .2;
@@ -111,7 +110,7 @@ namespace Assignment1_NimGame.Models
             return isDuplicate;
         }
 
-        public void PrintBadStates()
+        public override void PrintKnownMoves()
         {
             foreach (BoardState state in MoveStates)
             {

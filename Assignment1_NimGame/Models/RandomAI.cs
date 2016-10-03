@@ -8,7 +8,7 @@ namespace Assignment1_NimGame.Models
 {
     public class RandomAI : NimPlayer
     {
-        Random rnd = new Random();
+        private Random rnd = new Random();
         private List<BoardState> MoveStates = new List<BoardState>();
 
         public override Move MakeMove(Row[] rows)
@@ -35,7 +35,7 @@ namespace Assignment1_NimGame.Models
             return choice;
         }
 
-        public void PrintBadStates()
+        public override void PrintKnownMoves()
         {
             foreach (BoardState state in MoveStates)
             {

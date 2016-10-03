@@ -13,8 +13,8 @@ namespace Assignment1_NimGame
         {
             Game game = new Game();
             Game aiTest = new Game();
-            //game.PlayGame();
-            aiTest.RandomVsLearningAI(1000);
+            game.PlayGame();
+            //aiTest.RandomVsLearningAI(1000);
         }
     }
 }

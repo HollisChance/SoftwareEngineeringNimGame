@@ -11,6 +11,8 @@ namespace Assignment1_NimGame.Models
 
 
    abstract public Move MakeMove(Row[] rows);
+
+        abstract public void PrintKnownMoves();
         
     }
 }
