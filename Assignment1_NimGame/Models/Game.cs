@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Assignment1_NimGame.Models
 {
-    class Game
+ public class Game
     {
         const int _numRows = 3;
         const int row1Size = 3;
