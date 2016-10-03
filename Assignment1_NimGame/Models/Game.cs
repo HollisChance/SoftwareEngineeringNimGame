@@ -16,8 +16,8 @@ namespace Assignment1_NimGame.Models
         private Row[] _rows;
         private List<BoardState> boardStates = new List<BoardState>(); // maybe this shouldn't be global? just stored on a per game basis(ie in PlayGame)
         Player turn;
-        ComputerPlayer compPlayer1;
-        ComputerPlayer compPlayer2;
+        SmartAI compPlayer1;
+        SmartAI compPlayer2;
         int player1Wins = 0;
         int player2Wins = 0;
         int numComputerPlayers;
@@ -26,8 +26,8 @@ namespace Assignment1_NimGame.Models
         {
             turn = Player.Player1;
             bool keepPlaying = true;
-            compPlayer1 = new ComputerPlayer();
-            compPlayer2 = new ComputerPlayer();
+            compPlayer1 = new SmartAI();
+            compPlayer2 = new SmartAI();
             numComputerPlayers = ChooseGameMode();
             while(keepPlaying)
             {
@@ -57,8 +57,8 @@ namespace Assignment1_NimGame.Models
         public void RandomVsLearningAI(int playTimes)
         {
             turn = Player.Player1;
-            compPlayer1 = new ComputerPlayer();
-            compPlayer2 = new ComputerPlayer();
+            compPlayer1 = new SmartAI();
+            compPlayer2 = new SmartAI();
             numComputerPlayers = 2;
             for (int j = 0; j < playTimes; ++j)
             {
@@ -130,13 +130,13 @@ namespace Assignment1_NimGame.Models
             return isGameOver;
         }
 
-        public bool TakeComputerTurn(ComputerPlayer comp)
+        public bool TakeComputerTurn(SmartAI comp)
         {
             int row = 0;
             int numToRemove = 0;
             if (turn == Player.Player2) // computer 2 uses the learning system
             {
-                Move move = comp.MakeLearnedMove(_rows);
+                Move move = comp.MakeMove(_rows);
                 row = move.Row;
                 numToRemove = move.NumToRemove;
             }
